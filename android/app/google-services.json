@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "39514107844",
+    "project_id": "walklingo",
+    "storage_bucket": "walklingo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:39514107844:android:5de669d99d3ece6c0afe91",
+        "android_client_info": {
+          "package_name": "com.example.walklingo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMF3R0BHm4X14YI2j8SyBeowrRfHs_wek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
