@@ -21,3 +21,7 @@ final class AudioFailure extends Failure {
 final class TrackingFailure extends Failure {
   const TrackingFailure(super.message);
 }
+
+final class DictionaryFailure extends Failure {
+  const DictionaryFailure(super.message);
+}

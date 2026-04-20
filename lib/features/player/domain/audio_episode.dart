@@ -1,3 +1,4 @@
+/// Mô tả một bản ghi phát (stream) — dùng chung cho player (ví dụ LibriVox chapter).
 class AudioEpisode {
   const AudioEpisode({
     required this.id,

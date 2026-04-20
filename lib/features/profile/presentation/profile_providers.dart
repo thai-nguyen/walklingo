@@ -7,7 +7,10 @@ import "../domain/user_profile.dart";
 import "../domain/user_profile_repository.dart";
 
 final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
-  return FirestoreUserProfileRepository(ref.watch(firestoreProvider));
+  return FirestoreUserProfileRepository(
+    ref.watch(firestoreProvider),
+    ref.watch(firebaseStorageProvider),
+  );
 });
 
 final userProfileProvider = FutureProvider<UserProfile?>((ref) async {

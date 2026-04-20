@@ -5,6 +5,7 @@ import "../core/theme/app_theme.dart";
 import "fcm_host.dart";
 import "router.dart";
 import "scaffold_keys.dart";
+import "walking_wakelock_host.dart";
 
 class WalkLingoApp extends ConsumerWidget {
   const WalkLingoApp({super.key});
@@ -17,7 +18,9 @@ class WalkLingoApp extends ConsumerWidget {
       theme: AppTheme.light(),
       routerConfig: router,
       debugShowCheckedModeBanner: false,
-      builder: (context, child) => FcmHost(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) => WalkingWakelockHost(
+            child: FcmHost(child: child ?? const SizedBox.shrink()),
+          ),
     );
   }
 }

@@ -1,8 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:go_router/go_router.dart";
 
 import "../../auth/presentation/auth_providers.dart";
-import "../../catalog/domain/audio_episode.dart";
+import "../domain/audio_episode.dart";
 import "../../listen_history/domain/listen_session.dart";
 import "../../listen_history/presentation/listen_history_providers.dart";
 import "../../profile/presentation/profile_providers.dart";
@@ -13,7 +14,12 @@ import "../data/audio_player_service.dart";
 import "audio_player_providers.dart";
 
 class NowPlayingScreen extends ConsumerWidget {
-  const NowPlayingScreen({super.key});
+  const NowPlayingScreen({
+    super.key,
+    this.autoPlayOnOpen = false,
+  });
+
+  final bool autoPlayOnOpen;
 
   Future<void> _saveSession(BuildContext context, WidgetRef ref) async {
     final auth = ref.read(authStateChangesProvider).valueOrNull;
@@ -86,13 +92,25 @@ class NowPlayingScreen extends ConsumerWidget {
     final episode = player.currentEpisode;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Trình phát")),
+      appBar: AppBar(
+        title: const Text("Trình phát"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go("/listen");
+            }
+          },
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: episode == null
             ? Center(
                 child: Text(
-                  "Chưa chọn bài.\nVào tab Bài nghe và mở một episode để phát.",
+                  "Chưa chọn bài.\nBài nghe → chọn sách LibriVox và một chapter để phát.",
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -100,7 +118,13 @@ class NowPlayingScreen extends ConsumerWidget {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(child: _PlayerBody(episode: episode, player: player)),
+                  Expanded(
+                    child: _PlayerBody(
+                      episode: episode,
+                      player: player,
+                      autoPlayOnOpen: autoPlayOnOpen,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   OutlinedButton.icon(
                     onPressed: () => _saveSession(context, ref),
@@ -115,16 +139,51 @@ class NowPlayingScreen extends ConsumerWidget {
 }
 
 class _PlayerBody extends StatefulWidget {
-  const _PlayerBody({required this.episode, required this.player});
+  const _PlayerBody({
+    required this.episode,
+    required this.player,
+    this.autoPlayOnOpen = false,
+  });
 
   final AudioEpisode episode;
   final AudioPlayerService player;
+  final bool autoPlayOnOpen;
 
   @override
   State<_PlayerBody> createState() => _PlayerBodyState();
 }
 
 class _PlayerBodyState extends State<_PlayerBody> {
+  bool _didAutoPlay = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _triggerAutoPlay();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PlayerBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.episode.id != widget.episode.id) {
+      _didAutoPlay = false;
+      _triggerAutoPlay();
+    }
+  }
+
+  void _triggerAutoPlay() {
+    if (!widget.autoPlayOnOpen || _didAutoPlay) return;
+    _didAutoPlay = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      try {
+        await widget.player.play();
+      } catch (_) {
+        // Nút play vẫn khả dụng nếu autoplay lỗi.
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final player = widget.player;

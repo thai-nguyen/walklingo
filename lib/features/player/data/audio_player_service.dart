@@ -1,8 +1,13 @@
-import "package:audio_session/audio_session.dart";
-import "package:just_audio/just_audio.dart";
+import "dart:async";
 
-import "../../catalog/domain/audio_episode.dart";
+import "package:audio_session/audio_session.dart";
+import "package:flutter/foundation.dart";
+import "package:just_audio/just_audio.dart";
+import "package:just_audio_background/just_audio_background.dart";
+
+import "../../../app/playback_environment.dart";
 import "../../../core/failures.dart";
+import "../domain/audio_episode.dart";
 
 class AudioPlayerService {
   AudioPlayerService() : _player = AudioPlayer() {
@@ -10,6 +15,7 @@ class AudioPlayerService {
   }
 
   final AudioPlayer _player;
+  final currentEpisodeNotifier = ValueNotifier<AudioEpisode?>(null);
 
   AudioEpisode? _currentEpisode;
   DateTime? _sessionStartedAt;
@@ -23,7 +29,6 @@ class AudioPlayerService {
   Stream<Duration?> get positionStream => _player.positionStream;
 
   Stream<Duration?> get durationStream => _player.durationStream;
-
   Future<void> _configureSession() async {
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.music());
@@ -32,8 +37,27 @@ class AudioPlayerService {
   Future<void> loadEpisode(AudioEpisode episode) async {
     try {
       _currentEpisode = episode;
+      currentEpisodeNotifier.value = episode;
       _sessionStartedAt = DateTime.now();
-      await _player.setUrl(episode.streamUrl);
+      if (PlaybackEnvironment.justAudioBackgroundReady) {
+        final duration = episode.durationSec != null
+            ? Duration(seconds: episode.durationSec!)
+            : null;
+        await _player.setAudioSource(
+          AudioSource.uri(
+            Uri.parse(episode.streamUrl),
+            tag: MediaItem(
+              id: episode.id,
+              title: episode.title,
+              artist: episode.sourceName,
+              duration: duration,
+              extras: {"sourceUrl": episode.sourceUrl},
+            ),
+          ),
+        );
+      } else {
+        await _player.setUrl(episode.streamUrl);
+      }
     } catch (e, st) {
       Error.throwWithStackTrace(AudioFailure("Không tải được audio: $e"), st);
     }
@@ -48,6 +72,7 @@ class AudioPlayerService {
   Future<void> stop() async {
     await _player.stop();
     _currentEpisode = null;
+    currentEpisodeNotifier.value = null;
     _sessionStartedAt = null;
   }
 
@@ -56,6 +81,7 @@ class AudioPlayerService {
   Duration? get duration => _player.duration;
 
   Future<void> dispose() async {
+    currentEpisodeNotifier.dispose();
     await _player.dispose();
   }
 }

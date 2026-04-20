@@ -31,6 +31,15 @@ dependencies:
   uuid: ^4.5.1
   url_launcher: ^6.3.1
 
+  http: ^1.2.2
+  xml: ^6.5.0
+  just_audio_background: ^0.0.1-beta.17
+  wakelock_plus: ^1.6.0
+  table_calendar: ^3.2.0
+  firebase_storage: ^12.4.10
+  image_picker: ^1.2.1
+  fl_chart: ^1.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -38,3 +47,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/word_suggestions.json

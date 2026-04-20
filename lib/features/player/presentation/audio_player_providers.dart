@@ -7,3 +7,7 @@ final audioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
   ref.onDispose(service.dispose);
   return service;
 });
+
+final isAudioPlayingProvider = StreamProvider<bool>((ref) {
+  return ref.watch(audioPlayerServiceProvider).playingStream;
+});
