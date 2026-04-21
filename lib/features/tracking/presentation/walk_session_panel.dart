@@ -10,6 +10,7 @@ import "../../profile/presentation/profile_providers.dart";
 import "../../vocabulary/domain/daily_todo_item.dart";
 import "../../vocabulary/domain/daily_todo_kind.dart";
 import "../../vocabulary/presentation/vocabulary_providers.dart";
+import "../../vocabulary/presentation/today_steps_notifier.dart";
 import "../calorie_calculator.dart";
 import "../domain/walking_session.dart";
 import "step_tracking_providers.dart";
@@ -225,14 +226,14 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
     final session = ref.watch(activeWalkingSessionProvider);
     final active = session != null;
     final profileAsync = ref.watch(userProfileProvider);
-
+    final stepsToday = ref.watch(todayStepsProvider);
     final kcal = profileAsync.maybeWhen(
       data: (p) => estimateWalkingKcal(
-        steps: delta,
+        steps: stepsToday,
         weightKg: p?.weightKg,
         heightCm: p?.heightCm,
       ),
-      orElse: () => estimateWalkingKcal(steps: delta),
+      orElse: () => estimateWalkingKcal(steps: stepsToday),
     );
 
     final cs = Theme.of(context).colorScheme;
@@ -264,11 +265,11 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Hôm nay (tổng thiết bị)",
+                        "Hôm nay (theo phiên)",
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
                       Text(
-                        "${_lastTotal ?? "—"} bước",
+                        "$stepsToday bước",
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -281,7 +282,7 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        active ? "Trong phiên" : "Chưa có phiên",
+                        active ? "Phiên hiện tại" : "Chưa có phiên",
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
                       Text(
@@ -290,7 +291,7 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        "${kcal.toStringAsFixed(1)} kcal (ước lượng)",
+                        "${kcal.toStringAsFixed(1)} kcal hôm nay",
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
