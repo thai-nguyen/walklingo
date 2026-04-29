@@ -49,7 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '39514107844',
     projectId: 'walklingo',
     storageBucket: 'walklingo.firebasestorage.app',
-    iosBundleId: 'com.example.walklingo',
+    iosBundleId: 'vn.walklingo.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '39514107844',
     projectId: 'walklingo',
     storageBucket: 'walklingo.firebasestorage.app',
-    iosBundleId: 'com.example.walklingo',
+    iosBundleId: 'vn.walklingo.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -69,5 +69,4 @@ class DefaultFirebaseOptions {
     authDomain: 'walklingo.firebaseapp.com',
     storageBucket: 'walklingo.firebasestorage.app',
   );
-
 }

@@ -1,4 +1,4 @@
-package com.example.walklingo
+package vn.walklingo.app
 
 import com.ryanheise.audioservice.AudioServiceActivity
 
