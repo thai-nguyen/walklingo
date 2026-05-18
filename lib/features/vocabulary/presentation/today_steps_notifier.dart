@@ -96,6 +96,24 @@ class TodayStepsNotifier extends StateNotifier<int> {
     }
   }
 
+  /// Reset thủ công số bước hôm nay về 0.
+  Future<void> resetTodaySteps() async {
+    final today = dateKeyFromDateTime(DateTime.now());
+    _accumulated = 0;
+    _storedDay = today;
+
+    final session = _ref.read(activeWalkingSessionProvider);
+    if (session == null) {
+      state = 0;
+    } else {
+      state = session.deltaSteps(_lastTotal);
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("wl_steps_today_day", today);
+    await prefs.setInt("wl_steps_today_accumulated", 0);
+  }
+
   @override
   void dispose() {
     unawaited(_stepSub?.cancel());

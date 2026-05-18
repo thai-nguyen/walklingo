@@ -9,6 +9,7 @@ import "../../player/presentation/audio_player_providers.dart";
 import "../../profile/presentation/profile_providers.dart";
 import "../../vocabulary/domain/daily_todo_item.dart";
 import "../../vocabulary/domain/daily_todo_kind.dart";
+import "../../vocabulary/presentation/daily_plan_setup_sheet.dart";
 import "../../vocabulary/presentation/vocabulary_providers.dart";
 import "../../vocabulary/presentation/today_steps_notifier.dart";
 import "../calorie_calculator.dart";
@@ -72,11 +73,12 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
   }
 
   Future<void> _startWalk() async {
-    final total = _lastTotal;
-    if (total == null) {
-      setState(() => _status = "Đang chờ dữ liệu bước từ thiết bị…");
+    final plan = await ref.read(dailyPlanForSelectedDateProvider.future);
+    if (plan == null) {
+      await showDailyPlanSetupSheet(context, ref);
       return;
     }
+    final int total = _lastTotal ?? ref.read(todayStepsProvider);
     ref.read(activeWalkingSessionProvider.notifier).state = WalkingSession(
       stepsAtStart: total,
       startedAt: DateTime.now(),
@@ -248,10 +250,12 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
               children: [
                 Icon(Icons.directions_walk, color: cs.primary),
                 const SizedBox(width: 8),
-                Text(
-                  "Đi bộ",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    "Đi bộ",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -272,6 +276,22 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
                         "$stepsToday bước",
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        tooltip: "Reset bước hôm nay",
+                        onPressed: () async {
+                          await ref
+                              .read(todayStepsProvider.notifier)
+                              .resetTodaySteps();
+                          if (mounted) {
+                            ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                              const SnackBar(
+                                content: Text("Đã reset số bước hôm nay."),
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.refresh),
                       ),
                     ],
                   ),

@@ -8,4 +8,7 @@ abstract class VocabularyRepository {
   Future<void> upsertWord(String uid, LearnedWord word);
 
   Future<void> markReviewed(String uid, String lemmaId);
+
+  /// Gỡ trạng thái đã ôn (xóa `lastReviewedAt`) khi user bỏ tick một todo ôn.
+  Future<void> unmarkReviewed(String uid, String lemmaId);
 }

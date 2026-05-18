@@ -91,4 +91,19 @@ class FirestoreVocabularyRepository implements VocabularyRepository {
       );
     }
   }
+
+  @override
+  Future<void> unmarkReviewed(String uid, String lemmaId) async {
+    try {
+      await _col(uid).doc(lemmaId).update({
+        "lastReviewedAt": FieldValue.delete(),
+        "updatedAt": FieldValue.serverTimestamp(),
+      });
+    } catch (e, st) {
+      Error.throwWithStackTrace(
+        FirestoreFailure("Không gỡ trạng thái ôn tập: $e"),
+        st,
+      );
+    }
+  }
 }

@@ -268,14 +268,17 @@ class _TodoTile extends ConsumerWidget {
                     await ref
                         .read(dailyPlanRepositoryProvider)
                         .updateTodoItemCompletion(uid, dk, item.id, v);
-                    if (item.kind == DailyTodoKind.reviewOldWord && v) {
+                    if (item.kind == DailyTodoKind.reviewOldWord) {
                       final lid = item.id.startsWith("review_")
                           ? item.id.substring("review_".length)
                           : item.lemma ?? "";
                       if (lid.isNotEmpty) {
-                        await ref
-                            .read(vocabularyRepositoryProvider)
-                            .markReviewed(uid, lid);
+                        final repo = ref.read(vocabularyRepositoryProvider);
+                        if (v) {
+                          await repo.markReviewed(uid, lid);
+                        } else {
+                          await repo.unmarkReviewed(uid, lid);
+                        }
                       }
                     }
                   },
