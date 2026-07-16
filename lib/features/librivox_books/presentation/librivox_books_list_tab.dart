@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
+import "../../../app/app_navigation_bar.dart";
 import "librivox_books_providers.dart";
 
 /// Danh sách sách LibriVox (`books`).
@@ -10,6 +12,7 @@ class LibrivoxBooksListTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final async = ref.watch(librivoxBooksStreamProvider);
 
     return async.when(
@@ -19,8 +22,7 @@ class LibrivoxBooksListTab extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                "Chưa có sách trong Firestore.\n"
-                "Hồ sơ → Đồng bộ LibriVox → Sync Latest Data.",
+                l10n.noBooksInFirestore,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
@@ -28,7 +30,12 @@ class LibrivoxBooksListTab extends ConsumerWidget {
           );
         }
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            16 + mainShellBottomInset(context),
+          ),
           itemCount: books.length,
           itemBuilder: (context, i) {
             final b = books[i];
@@ -36,7 +43,7 @@ class LibrivoxBooksListTab extends ConsumerWidget {
               child: ListTile(
                 title: Text(b.title),
                 subtitle: Text(
-                  b.author.isEmpty ? "LibriVox" : b.author,
+                  b.author.isEmpty ? l10n.librivoxAuthorFallback : b.author,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -48,7 +55,7 @@ class LibrivoxBooksListTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text("Lỗi: $e")),
+      error: (e, _) => Center(child: Text(l10n.genericError(e.toString()))),
     );
   }
 }

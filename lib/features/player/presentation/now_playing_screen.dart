@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
 import "../../auth/presentation/auth_providers.dart";
 import "../domain/audio_episode.dart";
@@ -22,10 +23,11 @@ class NowPlayingScreen extends ConsumerWidget {
   final bool autoPlayOnOpen;
 
   Future<void> _saveSession(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final auth = ref.read(authStateChangesProvider).valueOrNull;
     if (auth == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cần đăng nhập để lưu lịch sử.")),
+        SnackBar(content: Text(l10n.signInToSaveHistory)),
       );
       return;
     }
@@ -34,7 +36,7 @@ class NowPlayingScreen extends ConsumerWidget {
     final ep = player.currentEpisode;
     if (ep == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Chưa có bài đang phát.")),
+        SnackBar(content: Text(l10n.noEpisodePlaying)),
       );
       return;
     }
@@ -74,13 +76,13 @@ class NowPlayingScreen extends ConsumerWidget {
           );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Đã lưu vào Lịch sử.")),
+          SnackBar(content: Text(l10n.historySavedSnack)),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Lưu thất bại: $e")),
+          SnackBar(content: Text(l10n.historySaveFailed(e.toString()))),
         );
       }
     }
@@ -88,12 +90,13 @@ class NowPlayingScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final player = ref.watch(audioPlayerServiceProvider);
     final episode = player.currentEpisode;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Trình phát"),
+        title: Text(l10n.playerTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -110,7 +113,7 @@ class NowPlayingScreen extends ConsumerWidget {
         child: episode == null
             ? Center(
                 child: Text(
-                  "Chưa chọn bài.\nBài nghe → chọn sách LibriVox và một chapter để phát.",
+                  l10n.noEpisodeSelected,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -129,7 +132,7 @@ class NowPlayingScreen extends ConsumerWidget {
                   OutlinedButton.icon(
                     onPressed: () => _saveSession(context, ref),
                     icon: const Icon(Icons.save_outlined),
-                    label: const Text("Lưu session nghe"),
+                    label: Text(l10n.saveListenSessionButton),
                   ),
                 ],
               ),
@@ -186,6 +189,7 @@ class _PlayerBodyState extends State<_PlayerBody> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final player = widget.player;
     final cs = Theme.of(context).colorScheme;
 
@@ -255,7 +259,7 @@ class _PlayerBodyState extends State<_PlayerBody> {
         ),
         const SizedBox(height: 16),
         Text(
-          "Nguồn: ${widget.episode.sourceUrl}",
+          l10n.sourceLabel(widget.episode.sourceUrl),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.outline),
         ),
       ],

@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
 import "../../player/domain/audio_episode.dart";
 import "../../player/presentation/audio_player_providers.dart";
@@ -21,12 +22,13 @@ class LibrivoxBookDetailScreen extends ConsumerWidget {
   ) async {
     if (chapter.audioUrl.isEmpty) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final episode = AudioEpisode(
       id: "${book.id}_${chapter.id}",
-      title: "${book.title} — ${chapter.title}",
-      description: book.author.isNotEmpty ? "Tác giả: ${book.author}" : null,
+      title: l10n.trackTitleSeparator(book.title, chapter.title),
+      description: book.author.isNotEmpty ? l10n.authorPrefix(book.author) : null,
       streamUrl: chapter.audioUrl,
-      sourceName: "LibriVox",
+      sourceName: l10n.librivoxTitle,
       sourceUrl: book.textUrl.isNotEmpty ? book.textUrl : "https://librivox.org/",
       order: 0,
     );
@@ -35,14 +37,14 @@ class LibrivoxBookDetailScreen extends ConsumerWidget {
       await ref.read(audioPlayerServiceProvider).loadEpisode(episode);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Đã mở chapter — sang Trình phát")),
+          SnackBar(content: Text(l10n.chapterOpenedSnack)),
         );
         context.push("/player?autoplay=1");
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Không phát được: $e")),
+          SnackBar(content: Text(l10n.cannotPlay(e.toString()))),
         );
       }
     }
@@ -50,22 +52,23 @@ class LibrivoxBookDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final bookAsync = ref.watch(librivoxBookProvider(bookId));
     final chaptersAsync = ref.watch(librivoxChaptersStreamProvider(bookId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text("LibriVox")),
+      appBar: AppBar(title: Text(l10n.librivoxTitle)),
       body: bookAsync.when(
         data: (book) {
           if (book == null) {
-            return const Center(child: Text("Không tìm thấy sách."));
+            return Center(child: Text(l10n.bookNotFound));
           }
           return chaptersAsync.when(
             data: (chapters) {
               if (chapters.isEmpty) {
                 return Center(
                   child: Text(
-                    "Chưa có chapter.\nKiểm tra đồng bộ RSS cho sách này.",
+                    l10n.noChaptersSyncHint,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
@@ -104,7 +107,7 @@ class LibrivoxBookDetailScreen extends ConsumerWidget {
                             leading: const Icon(Icons.play_circle_outline),
                             title: Text(ch.title),
                             subtitle: ch.audioUrl.isEmpty
-                                ? const Text("Thiếu URL audio")
+                                ? Text(l10n.missingAudioUrl)
                                 : null,
                             onTap: ch.audioUrl.isEmpty
                                 ? null
@@ -118,11 +121,11 @@ class LibrivoxBookDetailScreen extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text("Lỗi chapter: $e")),
+            error: (e, _) => Center(child: Text(l10n.chapterError(e.toString()))),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text("Lỗi: $e")),
+        error: (e, _) => Center(child: Text(l10n.genericError(e.toString()))),
       ),
     );
   }

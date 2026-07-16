@@ -2,6 +2,7 @@ import "package:firebase_auth/firebase_auth.dart" as fb;
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "../../../l10n/app_localizations.dart";
 import "auth_providers.dart";
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -56,24 +57,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
+          child: Center(
+            child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 400,
+              minHeight: MediaQuery.sizeOf(context).height -
+                  MediaQuery.paddingOf(context).top -
+                  MediaQuery.paddingOf(context).bottom -
+                  bottomInset -
+                  48,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                     Icon(Icons.directions_walk_rounded, size: 56, color: cs.primary),
                     const SizedBox(height: 16),
                     Text(
-                      "WalkLingo",
+                      l10n.appName,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
@@ -81,7 +93,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _register ? "Tạo tài khoản" : "Đăng nhập để đồng bộ lịch sử",
+                      _register ? l10n.loginSubtitleRegister : l10n.loginSubtitleSignIn,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: cs.onSurfaceVariant,
@@ -91,23 +103,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: "Email",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.emailLabel,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (v) =>
-                          v == null || v.trim().isEmpty ? "Nhập email" : null,
+                          v == null || v.trim().isEmpty ? l10n.emailRequired : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _password,
                       obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: "Mật khẩu",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.passwordLabel,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (v) =>
-                          v == null || v.length < 6 ? "Tối thiểu 6 ký tự" : null,
+                          v == null || v.length < 6 ? l10n.passwordMinLength : null,
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 12),
@@ -125,7 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: 22,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : Text(_register ? "Đăng ký" : "Đăng nhập"),
+                          : Text(_register ? l10n.signUpButton : l10n.signInButton),
                     ),
                     const SizedBox(height: 12),
                     TextButton(
@@ -136,9 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 _error = null;
                               }),
                       child: Text(
-                        _register
-                            ? "Đã có tài khoản? Đăng nhập"
-                            : "Chưa có tài khoản? Đăng ký",
+                        _register ? l10n.toggleToSignIn : l10n.toggleToSignUp,
                       ),
                     ),
                   ],

@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
 import "librivox_sync_notifier.dart";
 
@@ -9,22 +10,19 @@ class LibrivoxSyncScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final ui = ref.watch(librivoxSyncNotifierProvider);
     final notifier = ref.read(librivoxSyncNotifierProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Đồng bộ LibriVox")),
+      appBar: AppBar(title: Text(l10n.librivoxSyncTitle)),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "Tải danh sách audiobook từ LibriVox API, parse RSS và ghi vào "
-              "Firestore (collection `books`, subcollection `chapters`). "
-              "Tối đa 10 sách đầu; sách đã có document sẽ bị bỏ qua.\n\n"
-              "Sau khi xong: mở tab Bài nghe → LibriVox → chọn sách → chọn chapter để nghe "
-              "(mở Trình phát từ sách LibriVox để điều khiển).",
+              l10n.librivoxSyncDescription,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
@@ -41,8 +39,8 @@ class LibrivoxSyncScreen extends ConsumerWidget {
                   : const Icon(Icons.sync),
               label: Text(
                 ui is LibrivoxSyncLoading
-                    ? "Đang đồng bộ…"
-                    : "Sync Latest Data",
+                    ? l10n.syncInProgress
+                    : l10n.syncLatestData,
               ),
             ),
             const SizedBox(height: 24),
@@ -59,14 +57,24 @@ class _StatusPanel extends StatelessWidget {
 
   final LibrivoxSyncUiState state;
 
+  String _errorMessage(AppLocalizations l10n, LibrivoxSyncError error) {
+    return switch (error.code) {
+      LibrivoxSyncErrorCode.network => l10n.syncNetworkError,
+      LibrivoxSyncErrorCode.timeout => l10n.syncTimeoutError,
+      LibrivoxSyncErrorCode.signInRequired => l10n.syncSignInRequired,
+      _ => l10n.genericError(error.detail ?? error.code),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
     switch (state) {
       case LibrivoxSyncIdle():
         return Text(
-          "Nhấn nút để bắt đầu.",
+          l10n.syncPressToStart,
           style: TextStyle(color: cs.onSurfaceVariant),
         );
       case LibrivoxSyncLoading():
@@ -76,21 +84,22 @@ class _StatusPanel extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: SelectableText(
-              "Hoàn tất.\n"
-              "• Đã ghi: ${result.booksWritten} sách\n"
-              "• Bỏ qua (đã có): ${result.booksSkippedExisting}\n"
-              "• Tổng chapter ghi: ${result.totalChaptersWritten}",
+              l10n.syncSuccess(
+                result.booksWritten,
+                result.booksSkippedExisting,
+                result.totalChaptersWritten,
+              ),
               style: TextStyle(color: cs.primary),
             ),
           ),
         );
-      case LibrivoxSyncError(:final message):
+      case final LibrivoxSyncError error:
         return Card(
           color: cs.errorContainer,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: SelectableText(
-              message,
+              _errorMessage(l10n, error),
               style: TextStyle(color: cs.onErrorContainer),
             ),
           ),

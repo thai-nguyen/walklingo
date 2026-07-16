@@ -1,0 +1,461 @@
+{
+  "@@locale": "vi",
+  "appName": "WalkLingo",
+  "navToday": "Hôm nay",
+  "navProgress": "Tiến độ",
+  "navListen": "Bài nghe",
+  "navProfile": "Hồ sơ",
+  "navSettings": "Cài đặt",
+  "loginSubtitleSignIn": "Đăng nhập để đồng bộ lịch sử",
+  "loginSubtitleRegister": "Tạo tài khoản",
+  "emailLabel": "Email",
+  "emailRequired": "Nhập email",
+  "passwordLabel": "Mật khẩu",
+  "passwordMinLength": "Tối thiểu 6 ký tự",
+  "signInButton": "Đăng nhập",
+  "signUpButton": "Đăng ký",
+  "toggleToSignIn": "Đã có tài khoản? Đăng nhập",
+  "toggleToSignUp": "Chưa có tài khoản? Đăng ký",
+  "greetingMorning": "Chào buổi sáng",
+  "greetingMorningMessage": "Bắt đầu ngày mới với vài từ tiếng Anh nhé!",
+  "greetingAfternoon": "Chào buổi chiều",
+  "greetingAfternoonMessage": "Tiếp tục duy trì thói quen học tập nhé!",
+  "greetingEvening": "Chào buổi tối",
+  "greetingEveningMessage": "Ôn lại từ vựng trước khi nghỉ ngơi.",
+  "greetingNight": "Chào bạn",
+  "greetingNightMessage": "Dành chút thời gian cho tiếng Anh trước khi ngủ nhé!",
+  "greetingWithName": "{greeting}, {name}!",
+  "@greetingWithName": {
+    "placeholders": {
+      "greeting": {"type": "String"},
+      "name": {"type": "String"}
+    }
+  },
+  "greetingNoName": "{greeting}!",
+  "@greetingNoName": {
+    "placeholders": {
+      "greeting": {"type": "String"}
+    }
+  },
+  "todaySectionLabel": "Hôm nay",
+  "setupTodoTooltip": "Thiết lập todo",
+  "signInToUseTodo": "Đăng nhập để dùng todo.",
+  "noPlanToday": "Chưa có todo. Nhấn «Thiết lập todo» để thêm từ và mục tiêu.",
+  "noDataForDay": "Không có dữ liệu ngày này.",
+  "streakDays": "Bạn đã duy trì được {count} ngày liên tục.",
+  "@streakDays": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "calendarCollapseTooltip": "Thu gọn — chỉ tuần hiện tại",
+  "calendarExpandTooltip": "Mở rộng — xem cả tháng",
+  "planPercentComplete": "{percent}% hoàn thành ({completed}/{total})",
+  "@planPercentComplete": {
+    "placeholders": {
+      "percent": {"type": "int"},
+      "completed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "sectionReview": "Ôn tập",
+  "sectionNewWords": "Từ mới",
+  "sectionAudioAndSteps": "Audio & bước chân",
+  "quotaAudioTitle": "Nghe audio",
+  "quotaStepsTitle": "Đi bộ",
+  "quotaAudioProgress": "Đã nghe {current} / {goal} track — tự hoàn thành khi đạt mục tiêu.",
+  "@quotaAudioProgress": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "goal": {"type": "int"}
+    }
+  },
+  "quotaStepsProgress": "Đã đi {current} / {goal} bước — tự hoàn thành khi đạt mục tiêu.",
+  "@quotaStepsProgress": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "goal": {"type": "int"}
+    }
+  },
+  "genericError": "Lỗi: {error}",
+  "@genericError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "audioQuotaPreview": "Đã chọn {count} track để nghe hôm nay",
+  "@audioQuotaPreview": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "setupTodayTitle": "Thiết lập hôm nay",
+  "tracksSelectedCount": "Đã chọn: {count} track",
+  "@tracksSelectedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "collapse": "Thu gọn",
+  "expand": "Mở rộng",
+  "selectLibrivoxBook": "Chọn sách LibriVox",
+  "selectBookForTracks": "Chọn sách để hiện danh sách track.",
+  "bookNoChapters": "Sách chưa có chapter.",
+  "missingAudioUrl": "Thiếu URL audio",
+  "trackGoalAutoHint": "Mục tiêu track tự động = số track đã chọn",
+  "stepGoalLabel": "Mục tiêu bước chân",
+  "wordListLabel": "Danh sách từ (tiếng Anh), mỗi dòng hoặc dấu phẩy",
+  "createDailyTodoButton": "Tạo todo ngày",
+  "errorEnterAtLeastOneWord": "Nhập ít nhất một từ tiếng Anh.",
+  "errorSelectAtLeastOneTrack": "Chọn ít nhất 1 track để nghe hôm nay.",
+  "errorNoWordsLookedUp": "Không tra được từ nào.",
+  "snackbarPlanCreated": "Đã tạo todo hôm nay.",
+  "snackbarPlanCreatedWithSkips": "Đã tạo todo. Bỏ qua: {count} dòng.",
+  "@snackbarPlanCreatedWithSkips": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "trackTitleSeparator": "{bookTitle} — {chapterTitle}",
+  "@trackTitleSeparator": {
+    "placeholders": {
+      "bookTitle": {"type": "String"},
+      "chapterTitle": {"type": "String"}
+    }
+  },
+  "dictEnglishOnly": "Chỉ hỗ trợ từ tiếng Anh (chữ Latin).",
+  "dictWordNotFound": "Không tìm thấy từ \"{lemma}\" trong từ điển.",
+  "@dictWordNotFound": {
+    "placeholders": {
+      "lemma": {"type": "String"}
+    }
+  },
+  "dictApiStatus": "API từ điển: {statusCode}",
+  "@dictApiStatus": {
+    "placeholders": {
+      "statusCode": {"type": "int"}
+    }
+  },
+  "dictNoData": "Không có dữ liệu cho \"{lemma}\".",
+  "@dictNoData": {
+    "placeholders": {
+      "lemma": {"type": "String"}
+    }
+  },
+  "dictLookupError": "Lỗi tra từ: {error}",
+  "@dictLookupError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "walkingTitle": "Đi bộ",
+  "stepsNotSupportedWeb": "Đếm bước không hỗ trợ trên web.",
+  "stepsPermissionRequired": "Cần quyền nhận biết hoạt động / chuyển động để đếm bước.",
+  "pedometerError": "Lỗi pedometer: {error}",
+  "@pedometerError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "pedometerInitFailed": "Không khởi tạo được pedometer: {error}",
+  "@pedometerInitFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "todaySessionLabel": "Hôm nay (theo phiên)",
+  "stepsCount": "{count} bước",
+  "@stepsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "resetTodayStepsTooltip": "Reset bước hôm nay",
+  "stepsResetSnack": "Đã reset số bước hôm nay.",
+  "currentSessionLabel": "Phiên hiện tại",
+  "noSessionLabel": "Chưa có phiên",
+  "kcalToday": "{kcal} kcal hôm nay",
+  "@kcalToday": {
+    "placeholders": {
+      "kcal": {"type": "String"}
+    }
+  },
+  "endSessionButton": "Kết thúc phiên",
+  "startSessionButton": "Bắt đầu phiên",
+  "profileForCalorieHint": "Nhập cân nặng/chiều cao trong Cài đặt để ước lượng calo chính xác hơn.",
+  "walkSessionEndedTitle": "Phiên đi bộ đã kết thúc",
+  "walkStartedAt": "Bắt đầu: {time}",
+  "@walkStartedAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "walkEndedAt": "Kết thúc: {time}",
+  "@walkEndedAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "walkDuration": "Thời lượng: {duration}",
+  "@walkDuration": {
+    "placeholders": {
+      "duration": {"type": "String"}
+    }
+  },
+  "walkSessionSteps": "Bước trong phiên: {count}",
+  "@walkSessionSteps": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "walkEstimatedKcal": "Ước lượng: {kcal} kcal",
+  "@walkEstimatedKcal": {
+    "placeholders": {
+      "kcal": {"type": "String"}
+    }
+  },
+  "walkDeviceTotalSteps": "Tổng bước thiết bị (hiện tại): {count}",
+  "@walkDeviceTotalSteps": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "closeButton": "Đóng",
+  "durationHoursMinutesSeconds": "{hours} giờ {minutes} phút {seconds} giây",
+  "@durationHoursMinutesSeconds": {
+    "placeholders": {
+      "hours": {"type": "int"},
+      "minutes": {"type": "int"},
+      "seconds": {"type": "int"}
+    }
+  },
+  "durationMinutesSeconds": "{minutes} phút {seconds} giây",
+  "@durationMinutesSeconds": {
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "seconds": {"type": "int"}
+    }
+  },
+  "durationSecondsOnly": "{seconds} giây",
+  "@durationSecondsOnly": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "todayTrackFallbackTitle": "Track đã chọn hôm nay",
+  "todayGoalSourceName": "Mục tiêu hôm nay",
+  "playingTrackForWalk": "Đang phát track đã chọn cho phiên đi bộ.",
+  "cannotPlaySelectedTrack": "Không phát được track đã chọn: {error}",
+  "@cannotPlaySelectedTrack": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "profileTitle": "Hồ sơ",
+  "notSignedIn": "Chưa đăng nhập.",
+  "uploadAvatarTooltip": "Tải avatar lên",
+  "avatarUpdated": "Đã cập nhật avatar.",
+  "avatarUploadError": "Upload avatar lỗi: {error}",
+  "@avatarUploadError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "displayNameUnset": "Chưa đặt tên hiển thị",
+  "ageLabel": "Tuổi",
+  "genderLabel": "Giới tính",
+  "weightLabel": "Cân nặng",
+  "heightLabel": "Chiều cao",
+  "genderMale": "Nam",
+  "genderFemale": "Nữ",
+  "genderOther": "Khác",
+  "genderUnknown": "—",
+  "weightKgValue": "{weight} kg",
+  "@weightKgValue": {
+    "placeholders": {
+      "weight": {"type": "String"}
+    }
+  },
+  "heightCmValue": "{height} cm",
+  "@heightCmValue": {
+    "placeholders": {
+      "height": {"type": "String"}
+    }
+  },
+  "infoChipFormat": "{label}: {value}",
+  "@infoChipFormat": {
+    "placeholders": {
+      "label": {"type": "String"},
+      "value": {"type": "String"}
+    }
+  },
+  "editBasicInfoButton": "Sửa thông tin cơ bản",
+  "utilitiesSection": "Tiện ích",
+  "learnedWordsTitle": "Từ đã học",
+  "learnedWordsSubtitle": "Danh sách từ vựng đã lưu",
+  "librivoxSyncTitle": "Đồng bộ LibriVox",
+  "librivoxSyncSubtitle": "Sync Latest Data — API + RSS → Firestore books",
+  "editProfileTitle": "Chỉnh sửa hồ sơ",
+  "displayNameLabel": "Tên hiển thị",
+  "saveButton": "Lưu",
+  "saveError": "Lỗi: {error}",
+  "@saveError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "weightKgLabel": "Cân nặng (kg)",
+  "heightCmLabel": "Chiều cao (cm)",
+  "progressTitle": "Tiến độ",
+  "historyButton": "Lịch sử",
+  "noProgressData": "Chưa có dữ liệu để vẽ biểu đồ tiến độ.",
+  "periodDay": "Ngày",
+  "periodWeek": "Tuần",
+  "periodMonth": "Tháng",
+  "chartLearnedWords": "Số từ đã học",
+  "chartTracksListened": "Số track đã nghe",
+  "chartSteps": "Số bước chân",
+  "chartKcal": "Số kcal",
+  "listenTitle": "Bài nghe",
+  "noBooksInFirestore": "Chưa có sách trong Firestore.\nCài đặt → Đồng bộ LibriVox → Sync Latest Data.",
+  "librivoxAuthorFallback": "LibriVox",
+  "librivoxTitle": "LibriVox",
+  "bookNotFound": "Không tìm thấy sách.",
+  "noChaptersSyncHint": "Chưa có chapter.\nKiểm tra đồng bộ RSS cho sách này.",
+  "chapterOpenedSnack": "Đã mở chapter — sang Trình phát",
+  "cannotPlay": "Không phát được: {error}",
+  "@cannotPlay": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "authorPrefix": "Tác giả: {author}",
+  "@authorPrefix": {
+    "placeholders": {
+      "author": {"type": "String"}
+    }
+  },
+  "chapterError": "Lỗi chapter: {error}",
+  "@chapterError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "playerTitle": "Trình phát",
+  "signInToSaveHistory": "Cần đăng nhập để lưu lịch sử.",
+  "noEpisodePlaying": "Chưa có bài đang phát.",
+  "historySavedSnack": "Đã lưu vào Lịch sử.",
+  "historySaveFailed": "Lưu thất bại: {error}",
+  "@historySaveFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "noEpisodeSelected": "Chưa chọn bài.\nBài nghe → chọn sách LibriVox và một chapter để phát.",
+  "saveListenSessionButton": "Lưu session nghe",
+  "sourceLabel": "Nguồn: {url}",
+  "@sourceLabel": {
+    "placeholders": {
+      "url": {"type": "String"}
+    }
+  },
+  "historyByDayTitle": "Lịch sử theo ngày",
+  "noHistoryData": "Chưa có dữ liệu lịch sử theo ngày.",
+  "historyDaySummary": "Từ: {words} · Bước: {steps} · Kcal: {kcal} · Track: {tracks}\nHoàn thành: {percent}% ({completed}/{total})",
+  "@historyDaySummary": {
+    "placeholders": {
+      "words": {"type": "int"},
+      "steps": {"type": "int"},
+      "kcal": {"type": "String"},
+      "tracks": {"type": "int"},
+      "percent": {"type": "int"},
+      "completed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "historyDayDetailTitle": "Chi tiết {dateKey}",
+  "@historyDayDetailTitle": {
+    "placeholders": {
+      "dateKey": {"type": "String"}
+    }
+  },
+  "thatDayGoals": "Mục tiêu hôm đó",
+  "noTodoData": "Không có dữ liệu todo.",
+  "todoKindReview": "Ôn từ cũ",
+  "todoKindNewWord": "Từ mới",
+  "tracksListenedSection": "Track đã nghe",
+  "noTracksListened": "Không có track nào.",
+  "sessionTimeRange": "{start} - {end} · {minutes}m {seconds}s",
+  "@sessionTimeRange": {
+    "placeholders": {
+      "start": {"type": "String"},
+      "end": {"type": "String"},
+      "minutes": {"type": "int"},
+      "seconds": {"type": "int"}
+    }
+  },
+  "kpiWordsLearned": "Từ đã học",
+  "kpiSteps": "Bước",
+  "kpiCalories": "Calo",
+  "kpiTracks": "Track",
+  "kpiPercentComplete": "% hoàn thành",
+  "signInToView": "Đăng nhập để xem.",
+  "noWordsSaved": "Chưa có từ nào được lưu.",
+  "pronunciationTooltip": "Phát âm",
+  "exampleLabel": "Ví dụ: {example}",
+  "@exampleLabel": {
+    "placeholders": {
+      "example": {"type": "String"}
+    }
+  },
+  "librivoxSyncDescription": "Tải danh sách audiobook từ LibriVox API, parse RSS và ghi vào Firestore (collection books, subcollection chapters). Tối đa 10 sách đầu; sách đã có document sẽ bị bỏ qua.\n\nSau khi xong: mở tab Bài nghe → LibriVox → chọn sách → chọn chapter để nghe.",
+  "syncLatestData": "Sync Latest Data",
+  "syncInProgress": "Đang đồng bộ…",
+  "syncPressToStart": "Nhấn nút để bắt đầu.",
+  "syncSuccess": "Hoàn tất.\n• Đã ghi: {written} sách\n• Bỏ qua (đã có): {skipped}\n• Tổng chapter ghi: {chapters}",
+  "@syncSuccess": {
+    "placeholders": {
+      "written": {"type": "int"},
+      "skipped": {"type": "int"},
+      "chapters": {"type": "int"}
+    }
+  },
+  "syncNetworkError": "Lỗi mạng — kiểm tra kết nối và thử lại.",
+  "syncTimeoutError": "Hết giờ chờ — LibriVox hoặc RSS phản hồi quá lâu.",
+  "syncSignInRequired": "Cần đăng nhập trước khi đồng bộ.",
+  "pauseTooltip": "Tạm dừng",
+  "playTooltip": "Phát",
+  "notificationDefaultTitle": "Thông báo",
+  "notificationTitleBody": "{title} · {body}",
+  "@notificationTitleBody": {
+    "placeholders": {
+      "title": {"type": "String"},
+      "body": {"type": "String"}
+    }
+  },
+  "settingsTitle": "Cài đặt",
+  "appearanceSection": "Giao diện",
+  "themeLight": "Sáng",
+  "themeDark": "Tối",
+  "languageSection": "Ngôn ngữ",
+  "languageVietnamese": "Tiếng Việt",
+  "languageEnglish": "English",
+  "accountSection": "Tài khoản",
+  "signOutButton": "Đăng xuất",
+  "deleteAccountButton": "Xóa tài khoản",
+  "deleteAccountTitle": "Xóa tài khoản?",
+  "deleteAccountMessage": "Hành động này không thể hoàn tác. Toàn bộ dữ liệu học tập, lịch sử và hồ sơ sẽ bị xóa vĩnh viễn.",
+  "deleteAccountPasswordHint": "Nhập mật khẩu để xác nhận",
+  "deleteAccountConfirm": "Xóa vĩnh viễn",
+  "cancelButton": "Hủy",
+  "deleteAccountSuccess": "Đã xóa tài khoản.",
+  "deleteAccountError": "Không thể xóa tài khoản: {error}",
+  "@deleteAccountError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "deleteAccountReauthRequired": "Vui lòng đăng xuất, đăng nhập lại rồi thử xóa tài khoản.",
+  "noEmailForReauth": "Tài khoản không có email để xác thực lại.",
+  "offlineSnack": "Không có kết nối mạng."
+}

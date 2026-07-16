@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
 import "../../player/domain/audio_episode.dart";
 import "../../player/presentation/audio_player_providers.dart";
@@ -27,7 +28,8 @@ class WalkSessionPanel extends ConsumerStatefulWidget {
 
 class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
   StreamSubscription<int>? _stepSub;
-  String _status = "";
+  String? _statusKey;
+  String? _statusError;
   int? _lastTotal;
 
   @override
@@ -38,32 +40,36 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
 
   Future<void> _init() async {
     if (kIsWeb) {
-      setState(() => _status = "Đếm bước không hỗ trợ trên web.");
+      setState(() => _statusKey = "web");
       return;
     }
     final service = ref.read(stepTrackingServiceProvider);
     final ok = await service.ensurePermissions();
     if (!ok) {
-      setState(
-        () => _status =
-            "Cần quyền nhận biết hoạt động / chuyển động để đếm bước.",
-      );
+      setState(() => _statusKey = "permission");
       return;
     }
     try {
       _stepSub = service.watchTotalSteps().listen(
         _onStep,
-        onError: (Object e) => setState(() => _status = "Lỗi pedometer: $e"),
+        onError: (Object e) => setState(() {
+          _statusKey = "pedometer";
+          _statusError = e.toString();
+        }),
       );
     } catch (e) {
-      setState(() => _status = "Không khởi tạo được pedometer: $e");
+      setState(() {
+        _statusKey = "pedometerInit";
+        _statusError = e.toString();
+      });
     }
   }
 
   void _onStep(int total) {
     setState(() {
       _lastTotal = total;
-      _status = "";
+      _statusKey = null;
+      _statusError = null;
     });
     final session = ref.read(activeWalkingSessionProvider);
     if (session != null) {
@@ -88,6 +94,7 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
   }
 
   Future<void> _startSelectedTrackForToday() async {
+    final l10n = AppLocalizations.of(context)!;
     final plan = ref.read(dailyPlanForSelectedDateProvider).valueOrNull;
     if (plan == null) return;
 
@@ -117,7 +124,7 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
         : "track_${DateTime.now().millisecondsSinceEpoch}";
     final title = idx < trackTitles.length
         ? trackTitles[idx]
-        : "Track đã chọn hôm nay";
+        : l10n.todayTrackFallbackTitle;
 
     try {
       final player = ref.read(audioPlayerServiceProvider);
@@ -126,23 +133,27 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
           id: episodeId,
           title: title,
           streamUrl: url,
-          sourceName: "Mục tiêu hôm nay",
+          sourceName: l10n.todayGoalSourceName,
           sourceUrl: url,
           order: idx,
         ),
       );
       await player.play();
       if (mounted) {
-        setState(() => _status = "Đang phát track đã chọn cho phiên đi bộ.");
+        setState(() => _statusKey = "playingTrack");
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _status = "Không phát được track đã chọn: $e");
+        setState(() {
+          _statusKey = "cannotPlay";
+          _statusError = e.toString();
+        });
       }
     }
   }
 
   void _stopWalkAndSummarize() {
+    final l10n = AppLocalizations.of(context)!;
     final session = ref.read(activeWalkingSessionProvider);
     final total = _lastTotal;
     ref.read(activeWalkingSessionProvider.notifier).state = null;
@@ -165,28 +176,28 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Phiên đi bộ đã kết thúc"),
+        title: Text(l10n.walkSessionEndedTitle),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Bắt đầu: ${_fmtTime(session.startedAt)}"),
-              Text("Kết thúc: ${_fmtTime(endedAt)}"),
+              Text(l10n.walkStartedAt(_fmtTime(session.startedAt))),
+              Text(l10n.walkEndedAt(_fmtTime(endedAt))),
               const SizedBox(height: 8),
               Text(
-                "Thời lượng: ${_fmtDuration(dur)}",
+                l10n.walkDuration(_fmtDuration(l10n, dur)),
                 style: Theme.of(ctx).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                "Bước trong phiên: $delta",
+                l10n.walkSessionSteps(delta),
                 style: Theme.of(ctx).textTheme.titleMedium,
               ),
-              Text("Ước lượng: ${kcal.toStringAsFixed(1)} kcal"),
+              Text(l10n.walkEstimatedKcal(kcal.toStringAsFixed(1))),
               const SizedBox(height: 8),
               Text(
-                "Tổng bước thiết bị (hiện tại): $total",
+                l10n.walkDeviceTotalSteps(total),
                 style: Theme.of(ctx).textTheme.bodySmall,
               ),
             ],
@@ -195,7 +206,7 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
         actions: [
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text("Đóng"),
+            child: Text(l10n.closeButton),
           ),
         ],
       ),
@@ -207,13 +218,25 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
       "${d.minute.toString().padLeft(2, '0')}:"
       "${d.second.toString().padLeft(2, '0')}";
 
-  static String _fmtDuration(Duration d) {
+  static String _fmtDuration(AppLocalizations l10n, Duration d) {
     final h = d.inHours;
     final m = d.inMinutes.remainder(60);
     final s = d.inSeconds.remainder(60);
-    if (h > 0) return "$h giờ $m phút $s giây";
-    if (m > 0) return "$m phút $s giây";
-    return "$s giây";
+    if (h > 0) return l10n.durationHoursMinutesSeconds(h, m, s);
+    if (m > 0) return l10n.durationMinutesSeconds(m, s);
+    return l10n.durationSecondsOnly(s);
+  }
+
+  String? _localizedStatus(AppLocalizations l10n) {
+    return switch (_statusKey) {
+      "web" => l10n.stepsNotSupportedWeb,
+      "permission" => l10n.stepsPermissionRequired,
+      "pedometer" => l10n.pedometerError(_statusError ?? ""),
+      "pedometerInit" => l10n.pedometerInitFailed(_statusError ?? ""),
+      "playingTrack" => l10n.playingTrackForWalk,
+      "cannotPlay" => l10n.cannotPlaySelectedTrack(_statusError ?? ""),
+      _ => null,
+    };
   }
 
   @override
@@ -224,6 +247,7 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final delta = ref.watch(walkStepsDeltaProvider);
     final session = ref.watch(activeWalkingSessionProvider);
     final active = session != null;
@@ -239,6 +263,7 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
     );
 
     final cs = Theme.of(context).colorScheme;
+    final statusText = _localizedStatus(l10n);
 
     return Card(
       child: Padding(
@@ -252,7 +277,7 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    "Đi bộ",
+                    l10n.walkingTitle,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -269,25 +294,23 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Hôm nay (theo phiên)",
+                        l10n.todaySessionLabel,
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
                       Text(
-                        "$stepsToday bước",
+                        l10n.stepsCount(stepsToday),
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       IconButton(
-                        tooltip: "Reset bước hôm nay",
+                        tooltip: l10n.resetTodayStepsTooltip,
                         onPressed: () async {
                           await ref
                               .read(todayStepsProvider.notifier)
                               .resetTodaySteps();
                           if (mounted) {
                             ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                              const SnackBar(
-                                content: Text("Đã reset số bước hôm nay."),
-                              ),
+                              SnackBar(content: Text(l10n.stepsResetSnack)),
                             );
                           }
                         },
@@ -302,16 +325,16 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        active ? "Phiên hiện tại" : "Chưa có phiên",
+                        active ? l10n.currentSessionLabel : l10n.noSessionLabel,
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
                       Text(
-                        "$delta bước",
+                        l10n.stepsCount(delta),
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        "${kcal.toStringAsFixed(1)} kcal hôm nay",
+                        l10n.kcalToday(kcal.toStringAsFixed(1)),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -319,24 +342,24 @@ class _WalkSessionPanelState extends ConsumerState<WalkSessionPanel> {
                 ),
               ],
             ),
-            if (_status.isNotEmpty) ...[
+            if (statusText != null) ...[
               const SizedBox(height: 8),
-              Text(_status, style: TextStyle(color: cs.error)),
+              Text(statusText, style: TextStyle(color: cs.error)),
             ],
             const SizedBox(height: 16),
             if (active)
               FilledButton.tonal(
                 onPressed: _stopWalkAndSummarize,
-                child: const Text("Kết thúc phiên"),
+                child: Text(l10n.endSessionButton),
               )
             else
               FilledButton(
                 onPressed: () => _startWalk(),
-                child: const Text("Bắt đầu phiên"),
+                child: Text(l10n.startSessionButton),
               ),
             const SizedBox(height: 8),
             Text(
-              "Nhập cân nặng/chiều cao trong Hồ sơ để ước lượng calo chính xác hơn.",
+              l10n.profileForCalorieHint,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

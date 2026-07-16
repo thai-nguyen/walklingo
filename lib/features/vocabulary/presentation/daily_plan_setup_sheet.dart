@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
 import "../../../core/failures.dart";
 import "../../auth/presentation/auth_providers.dart";
@@ -56,17 +57,18 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     final uid = ref.read(authStateChangesProvider).valueOrNull?.id;
     if (uid == null) return;
 
     final stepGoal = int.tryParse(_stepCtl.text.trim()) ?? 3000;
     final pieces = splitWordInput(_wordsCtl.text);
     if (pieces.isEmpty) {
-      setState(() => _error = "Nhập ít nhất một từ tiếng Anh.");
+      setState(() => _error = l10n.errorEnterAtLeastOneWord);
       return;
     }
     if (_selectedTrackIds.isEmpty) {
-      setState(() => _error = "Chọn ít nhất 1 track để nghe hôm nay.");
+      setState(() => _error = l10n.errorSelectAtLeastOneTrack);
       return;
     }
 
@@ -99,7 +101,7 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
     if (dtos.isEmpty) {
       setState(() {
         _busy = false;
-        _error = fails.isEmpty ? "Không tra được từ nào." : fails.join("\n");
+        _error = fails.isEmpty ? l10n.errorNoWordsLookedUp : fails.join("\n");
       });
       return;
     }
@@ -134,20 +136,21 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
         reviewCandidates: review,
         newEntries: dtos,
         selectedTracks: selectedTracks,
+        audioQuotaPreview: l10n.audioQuotaPreview(selectedTracks.length),
       );
       await daily.saveDailyPlan(uid, plan);
 
       if (mounted) {
         widget.onClose();
         final msg = fails.isEmpty
-            ? "Đã tạo todo hôm nay."
-            : "Đã tạo todo. Bỏ qua: ${fails.length} dòng.";
+            ? l10n.snackbarPlanCreated
+            : l10n.snackbarPlanCreatedWithSkips(fails.length);
         ScaffoldMessenger.maybeOf(
           context,
         )?.showSnackBar(SnackBar(content: Text(msg)));
       }
     } catch (e) {
-      setState(() => _error = "$e");
+      setState(() => _error = l10n.genericError("$e"));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -155,6 +158,7 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final sug = ref.watch(wordSuggestionsProvider);
     final booksAsync = ref.watch(librivoxBooksStreamProvider);
     final chaptersAsync = _selectedBookId == null
@@ -168,7 +172,7 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "Thiết lập hôm nay",
+              l10n.setupTodayTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -177,7 +181,7 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
               children: [
                 Expanded(
                   child: Text(
-                    "Đã chọn: ${_selectedTrackIds.length} track",
+                    l10n.tracksSelectedCount(_selectedTrackIds.length),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -189,16 +193,16 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
                   ),
-                  label: Text(_tracksExpanded ? "Thu gọn" : "Mở rộng"),
+                  label: Text(_tracksExpanded ? l10n.collapse : l10n.expand),
                 ),
               ],
             ),
             booksAsync.when(
               data: (books) => DropdownButtonFormField<String>(
                 initialValue: _selectedBookId,
-                decoration: const InputDecoration(
-                  labelText: "Chọn sách LibriVox",
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.selectLibrivoxBook,
+                  border: const OutlineInputBorder(),
                 ),
                 items: books
                     .map(
@@ -220,17 +224,17 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
                 },
               ),
               loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text("$e"),
+              error: (e, _) => Text(l10n.genericError("$e")),
             ),
             if (_tracksExpanded) ...[
               const SizedBox(height: 8),
               chaptersAsync.when(
                 data: (chapters) {
                   if (_selectedBookId == null) {
-                    return const Text("Chọn sách để hiện danh sách track.");
+                    return Text(l10n.selectBookForTracks);
                   }
                   if (chapters.isEmpty) {
-                    return const Text("Sách chưa có chapter.");
+                    return Text(l10n.bookNoChapters);
                   }
                   return Container(
                     constraints: const BoxConstraints(maxHeight: 220),
@@ -255,8 +259,10 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
                                   setState(() {
                                     if (v == true) {
                                       _selectedTrackIds.add(key);
-                                      final title =
-                                          "${_selectedBookTitle ?? ""} — ${ch.title}";
+                                      final title = l10n.trackTitleSeparator(
+                                        _selectedBookTitle ?? "",
+                                        ch.title,
+                                      );
                                       _selectedTrackTitles[key] = title.trim();
                                       _selectedTrackUrls[key] = ch.audioUrl;
                                     } else {
@@ -269,14 +275,14 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
                           title: Text(ch.title),
                           subtitle: enabled
                               ? null
-                              : const Text("Thiếu URL audio"),
+                              : Text(l10n.missingAudioUrl),
                         );
                       },
                     ),
                   );
                 },
                 loading: () => const LinearProgressIndicator(),
-                error: (e, _) => Text("$e"),
+                error: (e, _) => Text(l10n.genericError("$e")),
               ),
             ] else if (_selectedTrackIds.isNotEmpty)
               Wrap(
@@ -290,16 +296,16 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
               ),
             const SizedBox(height: 6),
             Text(
-              "Mục tiêu track tự động = số track đã chọn",
+              l10n.trackGoalAutoHint,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _stepCtl,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Mục tiêu bước chân",
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.stepGoalLabel,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -307,9 +313,9 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
               controller: _wordsCtl,
               minLines: 4,
               maxLines: 8,
-              decoration: const InputDecoration(
-                labelText: "Danh sách từ (tiếng Anh), mỗi dòng hoặc dấu phẩy",
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.wordListLabel,
+                border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
             ),
@@ -332,7 +338,7 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
                 }).toList(),
               ),
               loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text("$e"),
+              error: (e, _) => Text(l10n.genericError("$e")),
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
@@ -350,7 +356,7 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
                       width: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text("Tạo todo ngày"),
+                  : Text(l10n.createDailyTodoButton),
             ),
           ],
         ),

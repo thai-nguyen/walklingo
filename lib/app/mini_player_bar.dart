@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
 import "../features/player/presentation/audio_player_providers.dart";
 
@@ -9,6 +10,7 @@ class MiniPlayerBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final player = ref.watch(audioPlayerServiceProvider);
     final playing = ref.watch(isAudioPlayingProvider).valueOrNull ?? false;
 
@@ -47,7 +49,7 @@ class MiniPlayerBar extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
-                    tooltip: playing ? "Tạm dừng" : "Phát",
+                    tooltip: playing ? l10n.pauseTooltip : l10n.playTooltip,
                     icon: Icon(playing ? Icons.pause : Icons.play_arrow),
                     onPressed: () async {
                       if (playing) {

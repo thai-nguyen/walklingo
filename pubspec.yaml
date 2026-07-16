@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
@@ -39,7 +41,9 @@ dependencies:
   firebase_storage: ^12.4.10
   image_picker: ^1.2.1
   fl_chart: ^1.2.0
-
+  connectivity_plus: ^7.2.0
+  liquid_glass_bar: ^0.1.1
+  liquid_glass_renderer: ^0.2.0-dev.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -47,5 +51,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/word_suggestions.json

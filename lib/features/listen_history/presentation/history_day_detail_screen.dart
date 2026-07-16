@@ -1,11 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:intl/intl.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
 import "daily_history_summary.dart";
 import "listen_history_providers.dart";
-
-final _timeFmt = DateFormat.Hm();
 
 class HistoryDayDetailScreen extends ConsumerWidget {
   const HistoryDayDetailScreen({super.key, required this.dateKey});
@@ -14,11 +13,14 @@ class HistoryDayDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).languageCode;
+    final timeFmt = DateFormat.Hm(locale);
     final sessionsAsync = ref.watch(listenSessionsProvider);
     final plansAsync = ref.watch(dailyPlansRawByDateProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text("Chi tiết $dateKey")),
+      appBar: AppBar(title: Text(l10n.historyDayDetailTitle(dateKey))),
       body: sessionsAsync.when(
         data: (sessions) {
           final plans = plansAsync.valueOrNull ?? const <String, Map<String, dynamic>>{};
@@ -37,13 +39,13 @@ class HistoryDayDetailScreen extends ConsumerWidget {
               _SummaryCard(summary: summary),
               const SizedBox(height: 12),
               Text(
-                "Mục tiêu hôm đó",
+                l10n.thatDayGoals,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               if (summary.todoItems.isEmpty)
-                const Card(
-                  child: ListTile(title: Text("Không có dữ liệu todo.")),
+                Card(
+                  child: ListTile(title: Text(l10n.noTodoData)),
                 )
               else
                 ...summary.todoItems.map((item) {
@@ -52,10 +54,10 @@ class HistoryDayDetailScreen extends ConsumerWidget {
                   final kind = item["kind"] as String? ?? "";
                   final title = lemma ??
                       switch (kind) {
-                        "audioQuota" => "Nghe audio",
-                        "stepsQuota" => "Đi bộ",
-                        "reviewOldWord" => "Ôn từ cũ",
-                        _ => "Từ mới",
+                        "audioQuota" => l10n.quotaAudioTitle,
+                        "stepsQuota" => l10n.quotaStepsTitle,
+                        "reviewOldWord" => l10n.todoKindReview,
+                        _ => l10n.todoKindNewWord,
                       };
                   return Card(
                     child: ListTile(
@@ -70,13 +72,13 @@ class HistoryDayDetailScreen extends ConsumerWidget {
                 }),
               const SizedBox(height: 12),
               Text(
-                "Track đã nghe",
+                l10n.tracksListenedSection,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               if (summary.sessions.isEmpty)
-                const Card(
-                  child: ListTile(title: Text("Không có track nào.")),
+                Card(
+                  child: ListTile(title: Text(l10n.noTracksListened)),
                 )
               else
                 ...summary.sessions.map(
@@ -84,7 +86,12 @@ class HistoryDayDetailScreen extends ConsumerWidget {
                     child: ListTile(
                       title: Text(s.episodeTitleSnapshot),
                       subtitle: Text(
-                        "${_timeFmt.format(s.startedAt)} - ${_timeFmt.format(s.endedAt)} · ${s.listenedSeconds ~/ 60}m ${s.listenedSeconds % 60}s",
+                        l10n.sessionTimeRange(
+                          timeFmt.format(s.startedAt),
+                          timeFmt.format(s.endedAt),
+                          s.listenedSeconds ~/ 60,
+                          s.listenedSeconds % 60,
+                        ),
                       ),
                     ),
                   ),
@@ -93,7 +100,7 @@ class HistoryDayDetailScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text("Lỗi: $e")),
+        error: (e, _) => Center(child: Text(l10n.genericError(e.toString()))),
       ),
     );
   }
@@ -106,6 +113,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -113,11 +121,11 @@ class _SummaryCard extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: [
-            _Kpi(label: "Từ đã học", value: "${summary.learnedWords}"),
-            _Kpi(label: "Bước", value: "${summary.steps}"),
-            _Kpi(label: "Calo", value: summary.kcal.toStringAsFixed(1)),
-            _Kpi(label: "Track", value: "${summary.tracks}"),
-            _Kpi(label: "% hoàn thành", value: "${summary.percentComplete}%"),
+            _Kpi(label: l10n.kpiWordsLearned, value: "${summary.learnedWords}"),
+            _Kpi(label: l10n.kpiSteps, value: "${summary.steps}"),
+            _Kpi(label: l10n.kpiCalories, value: summary.kcal.toStringAsFixed(1)),
+            _Kpi(label: l10n.kpiTracks, value: "${summary.tracks}"),
+            _Kpi(label: l10n.kpiPercentComplete, value: "${summary.percentComplete}%"),
           ],
         ),
       ),

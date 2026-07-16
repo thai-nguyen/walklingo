@@ -27,6 +27,7 @@ DailyPlan buildDailyPlan({
   required List<LearnedWord> reviewCandidates,
   required List<DictionaryEntryDto> newEntries,
   required List<SelectedTrackTarget> selectedTracks,
+  required String audioQuotaPreview,
 }) {
   final items = <DailyTodoItem>[];
   final seen = <String>{};
@@ -64,7 +65,7 @@ DailyPlan buildDailyPlan({
     DailyTodoItem(
       id: "quota_audio",
       kind: DailyTodoKind.audioQuota,
-      definitionPreview: "Đã chọn ${selectedTracks.length} track để nghe hôm nay",
+      definitionPreview: audioQuotaPreview,
       trackIds: selectedTracks.map((e) => e.id).toList(),
       trackTitles: selectedTracks.map((e) => e.title).toList(),
       trackUrls: selectedTracks.map((e) => e.audioUrl).toList(),

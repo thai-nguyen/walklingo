@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:table_calendar/table_calendar.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
+import "../../../app/app_navigation_bar.dart";
 import "../../auth/presentation/auth_providers.dart";
 import "../../listen_history/presentation/listen_history_providers.dart";
 import "../../tracking/presentation/walk_session_panel.dart";
@@ -10,8 +12,8 @@ import "../domain/daily_plan.dart";
 import "../domain/daily_todo_item.dart";
 import "../domain/daily_todo_kind.dart";
 import "../domain/date_calendar.dart";
-import "daily_plan_setup_sheet.dart";
 import "daily_quota_sync.dart";
+import "home_header.dart";
 import "today_steps_notifier.dart";
 import "vocabulary_providers.dart";
 
@@ -20,6 +22,7 @@ class TodayScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final auth = ref.watch(authStateChangesProvider);
     final selectedDay = ref.watch(selectedCalendarDateProvider);
     final dateKey = dateKeyFromDateTime(selectedDay);
@@ -37,59 +40,58 @@ class TodayScreen extends ConsumerWidget {
       children: [
         const DailyQuotaSync(),
         Scaffold(
-          appBar: AppBar(
-            title: const Text("Hôm nay"),
-            actions: [
-              IconButton(
-                onPressed: () => showDailyPlanSetupSheet(context, ref),
-                icon: const Icon(Icons.edit_calendar_outlined),
-              ),
-            ],
-          ),
-
           body: auth.when(
             data: (user) {
               if (user == null) {
-                return const Center(child: Text("Đăng nhập để dùng todo."));
+                return Center(child: Text(l10n.signInToUseTodo));
               }
               return ListView(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.only(bottom: 16 + mainShellBottomInset(context)),
                 children: [
-                  const _ExpandableTodayCalendar(),
-                  const SizedBox(height: 16),
-                  if (isToday) const WalkSessionPanel(),
-                  if (isToday) const SizedBox(height: 16),
-                  planAsync.when(
-                    data: (plan) {
-                      if (plan == null) {
-                        return Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              isToday
-                                  ? "Chưa có todo. Nhấn «Thiết lập todo» để thêm từ và mục tiêu."
-                                  : "Không có dữ liệu ngày này.",
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        );
-                      }
-                      return _PlanBody(
-                        plan: plan,
-                        interactive: interactive,
-                        tracksToday: tracks,
-                        stepsToday: stepsToday,
-                      );
-                    },
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Text("$e"),
+                  const HomeHeader(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const _ExpandableTodayCalendar(),
+                        const SizedBox(height: 16),
+                        if (isToday) const WalkSessionPanel(),
+                        if (isToday) const SizedBox(height: 16),
+                        planAsync.when(
+                          data: (plan) {
+                            if (plan == null) {
+                              return Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(
+                                    isToday
+                                        ? l10n.noPlanToday
+                                        : l10n.noDataForDay,
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                              );
+                            }
+                            return _PlanBody(
+                              plan: plan,
+                              interactive: interactive,
+                              tracksToday: tracks,
+                              stepsToday: stepsToday,
+                            );
+                          },
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (e, _) => Text(l10n.genericError("$e")),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text("$e")),
+            error: (e, _) => Center(child: Text(l10n.genericError("$e"))),
           ),
         ),
       ],
@@ -97,7 +99,7 @@ class TodayScreen extends ConsumerWidget {
   }
 }
 
-/// Lịch: mặc định cả tháng; thu gọn chỉ hiển thị **tuần** chứa ngày đang chọn.
+/// Calendar: month by default; collapsed shows only the week containing the selected day.
 class _ExpandableTodayCalendar extends ConsumerStatefulWidget {
   const _ExpandableTodayCalendar();
 
@@ -112,6 +114,7 @@ class _ExpandableTodayCalendarState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedDay = ref.watch(selectedCalendarDateProvider);
     final streak = ref.watch(completionStreakDaysProvider).valueOrNull ?? 0;
 
@@ -122,14 +125,14 @@ class _ExpandableTodayCalendarState
           children: [
             Expanded(
               child: Text(
-                "Bạn đã duy trì được $streak ngày liên tục.",
+                l10n.streakDays(streak),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
             IconButton(
               tooltip: _expandedMonth
-                  ? "Thu gọn — chỉ tuần hiện tại"
-                  : "Mở rộng — xem cả tháng",
+                  ? l10n.calendarCollapseTooltip
+                  : l10n.calendarExpandTooltip,
               onPressed: () => setState(() => _expandedMonth = !_expandedMonth),
               icon: Icon(
                 _expandedMonth ? Icons.unfold_less : Icons.unfold_more,
@@ -180,13 +183,18 @@ class _PlanBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          "${plan.percentComplete}% hoàn thành (${plan.completedCount}/${plan.totalCount})",
+          l10n.planPercentComplete(
+            plan.percentComplete,
+            plan.completedCount,
+            plan.totalCount,
+          ),
           style: theme.textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -200,7 +208,7 @@ class _PlanBody extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Text("Ôn tập", style: theme.textTheme.titleSmall),
+        Text(l10n.sectionReview, style: theme.textTheme.titleSmall),
         ...plan.items
             .where((i) => i.kind == DailyTodoKind.reviewOldWord)
             .map(
@@ -211,7 +219,7 @@ class _PlanBody extends ConsumerWidget {
               ),
             ),
         const SizedBox(height: 12),
-        Text("Từ mới", style: theme.textTheme.titleSmall),
+        Text(l10n.sectionNewWords, style: theme.textTheme.titleSmall),
         ...plan.items
             .where((i) => i.kind == DailyTodoKind.newWord)
             .map(
@@ -222,7 +230,7 @@ class _PlanBody extends ConsumerWidget {
               ),
             ),
         const SizedBox(height: 12),
-        Text("Audio & bước chân", style: theme.textTheme.titleSmall),
+        Text(l10n.sectionAudioAndSteps, style: theme.textTheme.titleSmall),
         ...plan.items
             .where(
               (i) =>
@@ -325,14 +333,13 @@ class _QuotaTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final t = plan.targets;
     late String subtitle;
     if (item.kind == DailyTodoKind.audioQuota) {
-      subtitle =
-          "Đã nghe $tracksToday / ${t.audioTrackGoal} track — tự hoàn thành khi đạt mục tiêu.";
+      subtitle = l10n.quotaAudioProgress(tracksToday, t.audioTrackGoal);
     } else {
-      subtitle =
-          "Đã đi $stepsToday / ${t.stepGoal} bước — tự hoàn thành khi đạt mục tiêu.";
+      subtitle = l10n.quotaStepsProgress(stepsToday, t.stepGoal);
     }
 
     return Card(
@@ -342,7 +349,9 @@ class _QuotaTile extends StatelessWidget {
           color: item.completed ? Colors.green : null,
         ),
         title: Text(
-          item.kind == DailyTodoKind.audioQuota ? "Nghe audio" : "Đi bộ",
+          item.kind == DailyTodoKind.audioQuota
+              ? l10n.quotaAudioTitle
+              : l10n.quotaStepsTitle,
         ),
         subtitle: Text(subtitle),
       ),

@@ -3,7 +3,9 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:intl/intl.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
+import "../../../app/app_navigation_bar.dart";
 import "../../listen_history/presentation/daily_history_summary.dart";
 import "../../listen_history/presentation/listen_history_providers.dart";
 
@@ -21,17 +23,19 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).languageCode;
     final sessionsAsync = ref.watch(listenSessionsProvider);
     final plansAsync = ref.watch(dailyPlansRawByDateProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tiến độ"),
+        title: Text(l10n.progressTitle),
         actions: [
           TextButton.icon(
             onPressed: () => context.push("/history"),
             icon: const Icon(Icons.history),
-            label: const Text("Lịch sử"),
+            label: Text(l10n.historyButton),
           ),
         ],
       ),
@@ -43,26 +47,31 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           if (dayData.isEmpty) {
             return Center(
               child: Text(
-                "Chưa có dữ liệu để vẽ biểu đồ tiến độ.",
+                l10n.noProgressData,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             );
           }
 
-          final grouped = _groupByPeriod(dayData, _period);
+          final grouped = _groupByPeriod(dayData, _period, locale);
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              16 + mainShellBottomInset(context),
+            ),
             children: [
               SegmentedButton<ProgressPeriod>(
-                segments: const [
-                  ButtonSegment(value: ProgressPeriod.day, label: Text("Ngày")),
+                segments: [
+                  ButtonSegment(value: ProgressPeriod.day, label: Text(l10n.periodDay)),
                   ButtonSegment(
                     value: ProgressPeriod.week,
-                    label: Text("Tuần"),
+                    label: Text(l10n.periodWeek),
                   ),
                   ButtonSegment(
                     value: ProgressPeriod.month,
-                    label: Text("Tháng"),
+                    label: Text(l10n.periodMonth),
                   ),
                 ],
                 selected: {_period},
@@ -70,25 +79,25 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               ),
               const SizedBox(height: 16),
               _MetricChartCard(
-                title: "Số từ đã học",
+                title: l10n.chartLearnedWords,
                 values: grouped.map((e) => e.learnedWords.toDouble()).toList(),
                 labels: grouped.map((e) => e.label).toList(),
                 color: Colors.blue,
               ),
               _MetricChartCard(
-                title: "Số track đã nghe",
+                title: l10n.chartTracksListened,
                 values: grouped.map((e) => e.tracks.toDouble()).toList(),
                 labels: grouped.map((e) => e.label).toList(),
                 color: Colors.deepPurple,
               ),
               _MetricChartCard(
-                title: "Số bước chân",
+                title: l10n.chartSteps,
                 values: grouped.map((e) => e.steps.toDouble()).toList(),
                 labels: grouped.map((e) => e.label).toList(),
                 color: Colors.green,
               ),
               _MetricChartCard(
-                title: "Số kcal",
+                title: l10n.chartKcal,
                 values: grouped.map((e) => e.kcal).toList(),
                 labels: grouped.map((e) => e.label).toList(),
                 color: Colors.orange,
@@ -97,7 +106,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text("Lỗi: $e")),
+        error: (e, _) => Center(child: Text(l10n.genericError(e.toString()))),
       ),
     );
   }
@@ -216,18 +225,19 @@ class _GroupedMetric {
 List<_GroupedMetric> _groupByPeriod(
   List<DailyHistorySummary> dayData,
   ProgressPeriod period,
+  String locale,
 ) {
   final map = <String, _GroupedMetric>{};
   for (final d in dayData) {
     final day = DateTime.parse("${d.dateKey} 00:00:00");
     final (key, sortKey) = switch (period) {
       ProgressPeriod.day => (
-          DateFormat("dd/MM").format(day),
+          DateFormat("dd/MM", locale).format(day),
           day.millisecondsSinceEpoch,
         ),
-      ProgressPeriod.week => _weekKey(day),
+      ProgressPeriod.week => _weekKey(day, locale),
       ProgressPeriod.month => (
-          DateFormat("MM/yyyy").format(day),
+          DateFormat("MM/yyyy", locale).format(day),
           DateTime(day.year, day.month, 1).millisecondsSinceEpoch,
         ),
     };
@@ -246,10 +256,10 @@ List<_GroupedMetric> _groupByPeriod(
   return list;
 }
 
-(String, int) _weekKey(DateTime d) {
+(String, int) _weekKey(DateTime d, String locale) {
   final monday = d.subtract(Duration(days: d.weekday - 1));
   final sunday = monday.add(const Duration(days: 6));
-  final f = DateFormat("dd/MM");
+  final f = DateFormat("dd/MM", locale);
   return (
     "${f.format(monday)}-${f.format(sunday)}",
     monday.millisecondsSinceEpoch,

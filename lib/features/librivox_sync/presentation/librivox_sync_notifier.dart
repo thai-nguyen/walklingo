@@ -4,6 +4,14 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../domain/librivox_sync_repository.dart";
 import "librivox_sync_providers.dart";
 
+/// Error codes for [LibrivoxSyncError] — localized in [LibrivoxSyncScreen].
+abstract final class LibrivoxSyncErrorCode {
+  static const network = "network";
+  static const timeout = "timeout";
+  static const signInRequired = "signInRequired";
+  static const generic = "generic";
+}
+
 /// Trạng thái UI đồng bộ LibriVox.
 sealed class LibrivoxSyncUiState {
   const LibrivoxSyncUiState();
@@ -12,7 +20,8 @@ sealed class LibrivoxSyncUiState {
   factory LibrivoxSyncUiState.loading() = LibrivoxSyncLoading;
   factory LibrivoxSyncUiState.success(LibrivoxSyncResult result) =
       LibrivoxSyncSuccess;
-  factory LibrivoxSyncUiState.error(String message) = LibrivoxSyncError;
+  factory LibrivoxSyncUiState.error(String code, {String? detail}) =
+      LibrivoxSyncError;
 }
 
 final class LibrivoxSyncIdle extends LibrivoxSyncUiState {
@@ -30,9 +39,10 @@ final class LibrivoxSyncSuccess extends LibrivoxSyncUiState {
 }
 
 final class LibrivoxSyncError extends LibrivoxSyncUiState {
-  LibrivoxSyncError(this.message);
+  LibrivoxSyncError(this.code, {this.detail});
 
-  final String message;
+  final String code;
+  final String? detail;
 }
 
 final librivoxSyncNotifierProvider =
@@ -54,7 +64,8 @@ class LibrivoxSyncNotifier extends Notifier<LibrivoxSyncUiState> {
       state = LibrivoxSyncUiState.success(result);
     } catch (e, st) {
       debugPrint("[LibrivoxSync] failed: $e\n$st");
-      state = LibrivoxSyncUiState.error(_formatError(e));
+      final (code, detail) = _classifyError(e);
+      state = LibrivoxSyncUiState.error(code, detail: detail);
     }
   }
 
@@ -62,17 +73,18 @@ class LibrivoxSyncNotifier extends Notifier<LibrivoxSyncUiState> {
     state = LibrivoxSyncIdle();
   }
 
-  static String _formatError(Object e) {
+  static (String code, String? detail) _classifyError(Object e) {
     final s = e.toString();
     if (s.contains("SocketException") || s.contains("network")) {
-      return "Lỗi mạng — kiểm tra kết nối và thử lại.";
+      return (LibrivoxSyncErrorCode.network, null);
     }
     if (s.contains("TimeoutException")) {
-      return "Hết giờ chờ — LibriVox hoặc RSS phản hồi quá lâu.";
+      return (LibrivoxSyncErrorCode.timeout, null);
     }
     if (e is StateError && s.contains("signed in")) {
-      return "Cần đăng nhập trước khi đồng bộ.";
+      return (LibrivoxSyncErrorCode.signInRequired, null);
     }
-    return s.length > 200 ? "${s.substring(0, 200)}…" : s;
+    final detail = s.length > 200 ? "${s.substring(0, 200)}…" : s;
+    return (LibrivoxSyncErrorCode.generic, detail);
   }
 }

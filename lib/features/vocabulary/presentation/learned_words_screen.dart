@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:just_audio/just_audio.dart";
+import "package:walklingo/l10n/app_localizations.dart";
 
 import "../../auth/presentation/auth_providers.dart";
 import "../domain/learned_word.dart";
@@ -11,20 +12,21 @@ class LearnedWordsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final auth = ref.watch(authStateChangesProvider);
     final wordsAsync = ref.watch(learnedWordsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Từ đã học")),
+      appBar: AppBar(title: Text(l10n.learnedWordsTitle)),
       body: auth.when(
         data: (user) {
           if (user == null) {
-            return const Center(child: Text("Đăng nhập để xem."));
+            return Center(child: Text(l10n.signInToView));
           }
           return wordsAsync.when(
             data: (words) {
               if (words.isEmpty) {
-                return const Center(child: Text("Chưa có từ nào được lưu."));
+                return Center(child: Text(l10n.noWordsSaved));
               }
               return ListView.separated(
                 padding: const EdgeInsets.all(16),
@@ -45,7 +47,7 @@ class LearnedWordsScreen extends ConsumerWidget {
                       isThreeLine: true,
                       trailing: w.pronunciationUrl != null
                           ? IconButton(
-                              tooltip: "Phát âm",
+                              tooltip: l10n.pronunciationTooltip,
                               icon: const Icon(Icons.volume_up_outlined),
                               onPressed: () async {
                                 final player = AudioPlayer();
@@ -65,16 +67,17 @@ class LearnedWordsScreen extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text("$e")),
+            error: (e, _) => Center(child: Text(l10n.genericError("$e"))),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text("$e")),
+        error: (e, _) => Center(child: Text(l10n.genericError("$e"))),
       ),
     );
   }
 
   void openLearnedWordDetail(BuildContext context, LearnedWord w) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       builder: (ctx) => Padding(
@@ -89,7 +92,7 @@ class LearnedWordsScreen extends ConsumerWidget {
               if (w.definitionPreview != null) Text(w.definitionPreview!),
               if (w.examplePreview != null) ...[
                 const SizedBox(height: 8),
-                Text("Ví dụ: ${w.examplePreview}"),
+                Text(l10n.exampleLabel(w.examplePreview!)),
               ],
             ],
           ),

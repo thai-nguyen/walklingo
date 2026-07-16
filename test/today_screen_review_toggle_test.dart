@@ -1,7 +1,4 @@
-import "dart:ui" show Size;
-
 import "package:flutter/material.dart";
-import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -21,6 +18,8 @@ import "package:walklingo/features/auth/presentation/auth_providers.dart";
 import "package:walklingo/features/listen_history/presentation/listen_history_providers.dart";
 import "package:walklingo/features/tracking/domain/step_tracking_service.dart";
 import "package:walklingo/features/tracking/presentation/step_tracking_providers.dart";
+
+import "l10n_test_helper.dart";
 
 class FakeDailyPlanRepository implements DailyPlanRepository {
   FakeDailyPlanRepository();
@@ -149,7 +148,8 @@ void main() {
           Stream<List<ListenSession>>.value(const <ListenSession>[]);
 
       await tester.pumpWidget(
-        ProviderScope(
+        wrapWithL10n(
+          const TodayScreen(),
           overrides: [
             authStateChangesProvider.overrideWith((ref) => Stream.value(user)),
             selectedCalendarDateProvider.overrideWith((ref) => selectedDay),
@@ -161,18 +161,11 @@ void main() {
             ),
             dailyPlanRepositoryProvider.overrideWithValue(fakeDaily),
             vocabularyRepositoryProvider.overrideWithValue(fakeVocab),
-
-            // Tránh khởi tạo pedometer trong test.
             stepTrackingServiceProvider.overrideWith(
               (ref) => _FakeStepTrackingService(),
             ),
             userProfileProvider.overrideWith((ref) => Future.value(null)),
           ],
-          child: MaterialApp(
-            home: Scaffold(
-              body: TodayScreen(),
-            ),
-          ),
         ),
       );
 

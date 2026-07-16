@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 
+import "../../../l10n/app_localizations.dart";
 import "../../auth/presentation/auth_providers.dart";
 import "../domain/user_profile.dart";
 import "profile_providers.dart";
@@ -57,7 +58,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         context.pop();
       }
     } catch (e) {
-      setState(() => _message = "Lỗi: $e");
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        setState(() => _message = l10n.saveError(e.toString()));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -65,6 +69,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final auth = ref.watch(authStateChangesProvider);
     final profile = ref.watch(userProfileProvider);
 
@@ -82,42 +87,44 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Chỉnh sửa hồ sơ")),
+      appBar: AppBar(title: Text(l10n.editProfileTitle)),
       body: auth.when(
         data: (user) {
-          if (user == null) return const Center(child: Text("Chưa đăng nhập."));
+          if (user == null) {
+            return Center(child: Text(l10n.notSignedIn));
+          }
           final current = profile.valueOrNull;
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
               TextField(
                 controller: _name,
-                decoration: const InputDecoration(
-                  labelText: "Tên hiển thị",
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.displayNameLabel,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _age,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Tuổi",
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.ageLabel,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 key: ValueKey(_gender),
                 initialValue: _gender,
-                decoration: const InputDecoration(
-                  labelText: "Giới tính",
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.genderLabel,
+                  border: const OutlineInputBorder(),
                 ),
-                items: const [
-                  DropdownMenuItem(value: "male", child: Text("Nam")),
-                  DropdownMenuItem(value: "female", child: Text("Nữ")),
-                  DropdownMenuItem(value: "other", child: Text("Khác")),
+                items: [
+                  DropdownMenuItem(value: "male", child: Text(l10n.genderMale)),
+                  DropdownMenuItem(value: "female", child: Text(l10n.genderFemale)),
+                  DropdownMenuItem(value: "other", child: Text(l10n.genderOther)),
                 ],
                 onChanged: (v) => setState(() => _gender = v),
               ),
@@ -126,9 +133,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 controller: _weight,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: "Cân nặng (kg)",
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.weightKgLabel,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -136,9 +143,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 controller: _height,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: "Chiều cao (cm)",
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.heightCmLabel,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               if (_message != null) ...[
@@ -154,7 +161,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text("Lưu"),
+                    : Text(l10n.saveButton),
               ),
             ],
           );

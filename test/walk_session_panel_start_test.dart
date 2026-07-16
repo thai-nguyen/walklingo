@@ -14,6 +14,9 @@ import "package:walklingo/features/tracking/presentation/walk_session_panel.dart
 import "package:walklingo/features/vocabulary/domain/daily_plan.dart";
 import "package:walklingo/features/vocabulary/domain/daily_plan_targets.dart";
 import "package:walklingo/features/vocabulary/presentation/vocabulary_providers.dart";
+import "package:walklingo/l10n/app_localizations.dart";
+
+import "l10n_test_helper.dart";
 
 class _FakeStepTrackingService implements StepTrackingService {
   @override
@@ -31,8 +34,16 @@ void main() {
         "wl_steps_today_accumulated": 0,
       });
 
+      late AppLocalizations l10n;
+
       await tester.pumpWidget(
-        ProviderScope(
+        wrapWithL10n(
+          Builder(
+            builder: (context) {
+              l10n = AppLocalizations.of(context)!;
+              return const WalkSessionPanel();
+            },
+          ),
           overrides: [
             stepTrackingServiceProvider.overrideWith(
               (ref) => _FakeStepTrackingService(),
@@ -45,18 +56,13 @@ void main() {
             ),
             userProfileProvider.overrideWith((ref) => Future.value(null)),
           ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: WalkSessionPanel(),
-            ),
-          ),
         ),
       );
 
       await tester.pumpAndSettle();
 
-      expect(find.text("Bắt đầu phiên"), findsOneWidget);
-      await tester.tap(find.text("Bắt đầu phiên"));
+      expect(find.text(l10n.startSessionButton), findsOneWidget);
+      await tester.tap(find.text(l10n.startSessionButton));
       await tester.pumpAndSettle();
 
       final container = ProviderScope.containerOf(
@@ -64,7 +70,7 @@ void main() {
       );
       final activeSession = container.read(activeWalkingSessionProvider);
       expect(activeSession, isNull);
-      expect(find.text("Thiết lập hôm nay"), findsOneWidget);
+      expect(find.text(l10n.setupTodayTitle), findsOneWidget);
     },
   );
 
@@ -91,8 +97,16 @@ void main() {
         totalCount: 0,
       );
 
+      late AppLocalizations l10n;
+
       await tester.pumpWidget(
-        ProviderScope(
+        wrapWithL10n(
+          Builder(
+            builder: (context) {
+              l10n = AppLocalizations.of(context)!;
+              return const WalkSessionPanel();
+            },
+          ),
           overrides: [
             stepTrackingServiceProvider.overrideWith(
               (ref) => _FakeStepTrackingService(),
@@ -105,17 +119,12 @@ void main() {
             ),
             userProfileProvider.overrideWith((ref) => Future.value(null)),
           ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: WalkSessionPanel(),
-            ),
-          ),
         ),
       );
 
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text("Bắt đầu phiên"));
+      await tester.tap(find.text(l10n.startSessionButton));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
@@ -138,8 +147,16 @@ void main() {
         "wl_steps_today_accumulated": 123,
       });
 
+      late AppLocalizations l10n;
+
       await tester.pumpWidget(
-        ProviderScope(
+        wrapWithL10n(
+          Builder(
+            builder: (context) {
+              l10n = AppLocalizations.of(context)!;
+              return const WalkSessionPanel();
+            },
+          ),
           overrides: [
             stepTrackingServiceProvider.overrideWith(
               (ref) => _FakeStepTrackingService(),
@@ -165,23 +182,17 @@ void main() {
             ),
             userProfileProvider.overrideWith((ref) => Future.value(null)),
           ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: WalkSessionPanel(),
-            ),
-          ),
         ),
       );
 
       await tester.pumpAndSettle();
-      expect(find.text("123 bước"), findsOneWidget);
+      expect(find.text(l10n.stepsCount(123)), findsOneWidget);
 
-      await tester.tap(find.byTooltip("Reset bước hôm nay"));
+      await tester.tap(find.byTooltip(l10n.resetTodayStepsTooltip));
       await tester.pumpAndSettle();
 
-      expect(find.text("0 bước"), findsWidgets);
-      expect(find.text("Đã reset số bước hôm nay."), findsOneWidget);
+      expect(find.text(l10n.stepsCount(0)), findsWidgets);
+      expect(find.text(l10n.stepsResetSnack), findsOneWidget);
     },
   );
 }
-

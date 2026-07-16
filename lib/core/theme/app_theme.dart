@@ -1,11 +1,18 @@
 import "package:flutter/material.dart";
 
 abstract final class AppTheme {
-  static ThemeData light() {
+  static const _seedColor = Color(0xFF2E7D59);
+
+  static ThemeData light() => _build(Brightness.light);
+
+  static ThemeData dark() => _build(Brightness.dark);
+
+  static ThemeData _build(Brightness brightness) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF2E7D59),
-      brightness: Brightness.light,
+      seedColor: _seedColor,
+      brightness: brightness,
     );
+    // Material 3: useMaterial3 + ColorScheme.fromSeed (M3 tonal palette).
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -16,6 +23,10 @@ abstract final class AppTheme {
         elevation: 0,
       ),
       navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         indicatorColor: colorScheme.secondaryContainer,
       ),
       cardTheme: CardThemeData(

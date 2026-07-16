@@ -9,11 +9,13 @@ import "../features/listen_history/presentation/history_day_detail_screen.dart";
 import "../features/player/presentation/now_playing_screen.dart";
 import "../features/librivox_books/presentation/librivox_book_detail_screen.dart";
 import "../features/librivox_sync/presentation/librivox_sync_screen.dart";
-import "../features/profile/presentation/profile_screen.dart";
 import "../features/profile/presentation/profile_edit_screen.dart";
 import "../features/progress/presentation/progress_screen.dart";
 import "../features/vocabulary/presentation/learned_words_screen.dart";
+import "../features/settings/presentation/settings_screen.dart";
 import "../features/vocabulary/presentation/today_screen.dart";
+import "../l10n/app_localizations.dart";
+import "app_navigation_bar.dart";
 import "go_router_refresh.dart";
 import "mini_player_bar.dart";
 import "../features/auth/presentation/auth_providers.dart";
@@ -44,6 +46,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: "/login", builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: "/profile",
+        redirect: (context, state) => "/settings",
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainShell(navigationShell: navigationShell);
@@ -76,8 +82,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: "/profile",
-                builder: (context, state) => const ProfileScreen(),
+                path: "/settings",
+                builder: (context, state) => const SettingsScreen(),
               ),
             ],
           ),
@@ -138,39 +144,34 @@ class MainShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final destinations = [
+      AppNavDestination(
+        label: l10n.navToday,
+        icon: Icons.today_rounded,
+      ),
+      AppNavDestination(
+        label: l10n.navProgress,
+        icon: Icons.show_chart_rounded,
+      ),
+      AppNavDestination(
+        label: l10n.navListen,
+        icon: Icons.menu_book_rounded,
+      ),
+      AppNavDestination(
+        label: l10n.navSettings,
+        icon: Icons.settings_rounded,
+      ),
+    ];
+
     return Scaffold(
+      extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const MiniPlayerBar(),
-          NavigationBar(
-            selectedIndex: navigationShell.currentIndex,
-            onDestinationSelected: (index) => navigationShell.goBranch(index),
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.today_outlined),
-                selectedIcon: Icon(Icons.today),
-                label: "Hôm nay",
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.show_chart_outlined),
-                selectedIcon: Icon(Icons.show_chart),
-                label: "Tiến độ",
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.menu_book_outlined),
-                selectedIcon: Icon(Icons.menu_book),
-                label: "Bài nghe",
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
-                label: "Hồ sơ",
-              ),
-            ],
-          ),
-        ],
+      bottomNavigationBar: MainShellBottomChrome(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) => navigationShell.goBranch(index),
+        miniPlayer: const MiniPlayerBar(),
+        destinations: destinations,
       ),
     );
   }
