@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:walklingo/l10n/app_localizations.dart";
@@ -6,6 +8,7 @@ import "../../../core/failures.dart";
 import "../../auth/presentation/auth_providers.dart";
 import "../../librivox_books/domain/librivox_book_chapter.dart";
 import "../../librivox_books/presentation/librivox_books_providers.dart";
+import "../../player/presentation/audio_player_providers.dart";
 import "../data/daily_plan_builder.dart";
 import "../data/dictionary_api_client.dart";
 import "../data/word_normalize.dart";
@@ -139,6 +142,12 @@ class _DailyPlanSetupSheetState extends ConsumerState<DailyPlanSetupSheet> {
         audioQuotaPreview: l10n.audioQuotaPreview(selectedTracks.length),
       );
       await daily.saveDailyPlan(uid, plan);
+
+      unawaited(
+        ref.read(audioTrackPreloadServiceProvider).preloadTracks(
+          selectedTracks.map((e) => e.audioUrl),
+        ),
+      );
 
       if (mounted) {
         widget.onClose();

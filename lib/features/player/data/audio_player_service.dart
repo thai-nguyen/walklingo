@@ -8,11 +8,16 @@ import "package:just_audio_background/just_audio_background.dart";
 import "../../../app/playback_environment.dart";
 import "../../../core/failures.dart";
 import "../domain/audio_episode.dart";
+import "audio_track_preload_service.dart";
 
 class AudioPlayerService {
-  AudioPlayerService() : _player = AudioPlayer() {
+  AudioPlayerService({AudioTrackPreloadService? preloadService})
+    : _preloadService = preloadService ?? AudioTrackPreloadService(),
+      _player = AudioPlayer() {
     _configureSession();
   }
+
+  final AudioTrackPreloadService _preloadService;
 
   final AudioPlayer _player;
   final currentEpisodeNotifier = ValueNotifier<AudioEpisode?>(null);
@@ -43,20 +48,23 @@ class AudioPlayerService {
         final duration = episode.durationSec != null
             ? Duration(seconds: episode.durationSec!)
             : null;
-        await _player.setAudioSource(
-          AudioSource.uri(
-            Uri.parse(episode.streamUrl),
-            tag: MediaItem(
-              id: episode.id,
-              title: episode.title,
-              artist: episode.sourceName,
-              duration: duration,
-              extras: {"sourceUrl": episode.sourceUrl},
-            ),
-          ),
+        final tag = MediaItem(
+          id: episode.id,
+          title: episode.title,
+          artist: episode.sourceName,
+          duration: duration,
+          extras: {"sourceUrl": episode.sourceUrl},
         );
+        final source = await _preloadService.audioSourceForUrl(
+          episode.streamUrl,
+          tag: tag,
+        );
+        await _player.setAudioSource(source);
       } else {
-        await _player.setUrl(episode.streamUrl);
+        final source = await _preloadService.audioSourceForUrl(
+          episode.streamUrl,
+        );
+        await _player.setAudioSource(source);
       }
     } catch (e, st) {
       Error.throwWithStackTrace(AudioFailure("Không tải được audio: $e"), st);
